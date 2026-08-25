@@ -1,100 +1,66 @@
-# EDUARDO • D'MASA V22 ULTRA — BLOG + CHAT EM TEMPO REAL
+# EDUARDO • D'MASA V23 — CONTROL CENTER
 
-Esta versão preserva a agenda, horários editáveis, painel, fotos, avaliações, autenticação e todos os recursos anteriores.
+Baseada no index atual enviado pelo usuário e preservando Agenda, Blog, Chat, Horários, Conteúdo, Avaliações e recursos anteriores.
 
-## Novo: Blog administrável
+## Painel > Site
+Edita e salva no Firestore:
+- nome do site e sigla
+- subtítulo e descrição SEO
+- textos do Hero
+- selos do Hero
+- textos do studio
+- WhatsApp
+- comodidades e pagamentos
+- logo por URL ou upload sem Firebase Storage
+- cores: principal, destaque, fundo, cards, texto e texto secundário
+- presets Red, Blue Steel, Emerald, Gold e Violet
+- prévia instantânea antes de salvar
 
-No site:
-- seção D'MASA Journal
-- artigos de autocuidado, cabelo, barba e estilo
-- artigo em tela premium
-- compartilhamento
-- imagens com fallback
-- responsivo em celular, tablet e desktop
+## Painel > Equipe
+- adicionar profissional
+- foto, nome, especialidade, avaliação e ordem
+- criar usuário e senha inicial
+- editar perfil
+- trocar acesso (novo usuário/senha)
+- desativar profissional
 
-No Painel > Blog:
-- novo artigo
-- editar artigo
-- excluir artigo
-- título
-- categoria
-- resumo
-- texto completo
-- publicado ou rascunho
-- foto por URL
-- foto enviada do computador/celular
-- compressão automática sem Firebase Storage
-- busca e filtro
+### Segurança das senhas
+Senhas nunca são gravadas no Firestore e nunca são exibidas pelo painel.
+O Firebase Authentication não permite que um site cliente leia a senha existente de outra conta.
+Por isso, “Trocar acesso” cria uma nova credencial e revoga o acesso profissional anterior no Firestore.
+O profissional também pode trocar a própria senha usando a senha atual.
 
-O arquivo enviado é convertido e otimizado no navegador antes de ser salvo no Firestore.
+## Painel profissional
+O profissional entra pelo mesmo formulário de login do site.
+Ele vê “Minha agenda” e pode:
+- ver somente os próprios agendamentos
+- concluir atendimentos
+- cancelar os próprios horários
+- falar com o cliente por WhatsApp
+- trocar a própria senha
 
-## Novo: Chat em tempo real
+Ele NÃO tem acesso a Equipe, Site, Catálogo, Blog, Conteúdo, Chat administrativo, Clientes gerais, Horários globais ou Bloqueios.
 
-No site:
-- botão Chat ao vivo ao lado de Agendar
-- atalho de Chat
-- Chat na navegação inferior
-- seção completa no meio da página
-- mensagens em tempo real
-- histórico por usuário
-- mensagens privadas
-- avisos de mensagem não lida
-- frases rápidas
-- limite de 800 caracteres
+## Painel > Catálogo
+- criar/editar/desativar serviços
+- preço, duração, ordem e imagem
+- criar/editar/desativar planos
+- benefícios e destaque
 
-No Painel > Chat:
-- lista de clientes
-- novas mensagens em tempo real
-- indicador de não lidas
-- busca de conversa
-- resposta ao cliente
-- botão WhatsApp quando o telefone estiver disponível
-- histórico de mensagens
+## Firestore novo
+Criado automaticamente quando usado:
+- settings/site
+- staff/{uid}
+- professionals/{id}
+- services/{id}
+- subscriptions/{id}
 
-Cada usuário só consegue acessar a própria conversa. A conta administrativa consegue responder a todas.
+## Instalação obrigatória
+1. Substitua index.html
+2. Firebase > Firestore Database > Regras
+3. Substitua tudo pelo firestore.rules deste pacote
+4. Clique em Publicar
+5. Faça Ctrl + Shift + R no site
 
-## Firestore usado pela V22
-
-Novas estruturas:
-- blogPosts/{postId}
-- chatThreads/{uid}
-- chatThreads/{uid}/messages/{messageId}
-
-Você NÃO precisa criar as coleções manualmente.
-
-## O que precisa atualizar
-
-OBRIGATÓRIO:
-1. substituir o index.html
-2. Firestore Database > Regras
-3. substituir pelas regras do firestore.rules da V22
-4. clicar em Publicar
-5. Ctrl + Shift + R
-
-Não é necessário Firebase Storage.
-Não é necessário plano Blaze.
-Não é necessário criar índices adicionais para Blog ou Chat.
-
-## Segurança
-
-Blog:
-- leitura pública
-- somente administrador pode escrever
-
-Chat:
-- cliente autenticado só lê/escreve a própria conversa
-- cliente não consegue ler conversas de outros usuários
-- somente administrador consegue acessar todas as conversas
-- mensagens de cliente são validadas como senderRole=customer
-- mensagens não podem ser editadas/deletadas pelo cliente
-
-## Imagens
-
-Continuam funcionando imagens locais como:
-- imagens/cabelo.png
-- imagens/barba.png
-- imagens/cabelo-barba.png
-- imagens/completo.png
-- imagens/corte1.png ... corte6.png
-
-As fotos enviadas pelo Painel > Blog são salvas como imagem otimizada dentro do próprio documento do artigo.
+Firebase Authentication > Email/Senha precisa continuar ativado.
+Firebase Storage não é necessário.
