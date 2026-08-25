@@ -1,0 +1,137 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function owner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function admin() {
+      return signedIn()
+        && request.auth.token.email == "eduardo@usuarios.eduardo.app";
+    }
+
+    match /users/{uid} {
+      allow read, create, update: if owner(uid) || admin();
+      allow delete: if false;
+    }
+
+    match /appointments/{id} {
+      allow read: if admin()
+        || (signedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if admin() || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "confirmed"
+        && request.resource.data.serviceId is string
+        && request.resource.data.professionalId is string
+        && request.resource.data.date is string
+        && request.resource.data.time is string
+        && request.resource.data.slotId is string
+      );
+
+      allow update: if admin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.serviceId == resource.data.serviceId
+        && request.resource.data.professionalId == resource.data.professionalId
+        && request.resource.data.date == resource.data.date
+        && request.resource.data.time == resource.data.time
+        && request.resource.data.slotId == resource.data.slotId
+      );
+
+      allow delete: if false;
+    }
+
+    match /bookingSlots/{slotId} {
+      allow read: if signedIn();
+
+      allow create: if admin() || (
+        signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "confirmed"
+      );
+
+      allow update: if admin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+      );
+
+      allow delete: if admin() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+      );
+    }
+
+    match /adminBlocks/{id} {
+      allow read, create, update, delete: if admin();
+    }
+
+    match /highlights/{id} {
+      allow read: if true;
+      allow create, update, delete: if admin();
+    }
+
+    match /reviews/{id} {
+      allow read: if true;
+      allow create, update, delete: if admin();
+    }
+
+    match /blogPosts/{id} {
+      allow read: if true;
+      allow create, update, delete: if admin();
+    }
+
+    match /settings/business {
+      allow read: if true;
+      allow create, update, delete: if admin();
+    }
+
+    match /chatThreads/{threadId} {
+      allow read: if admin() || (signedIn() && threadId == request.auth.uid);
+
+      allow create: if admin() || (
+        signedIn()
+        && threadId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+      );
+
+      allow update: if admin() || (
+        signedIn()
+        && threadId == request.auth.uid
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+      );
+
+      allow delete: if admin();
+
+      match /messages/{messageId} {
+        allow read: if admin() || (signedIn() && threadId == request.auth.uid);
+
+        allow create: if admin() || (
+          signedIn()
+          && threadId == request.auth.uid
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderRole == "customer"
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 800
+        );
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
